@@ -49,7 +49,7 @@ b2_ = bn(2);
 b3_ = bn(3);
 b4_ = bn(4);
 
-X0 = [b1_, a1_, b2_, a2_, b3_, a3_, b4_, a4_, m_, q_];
+X0 = [a1_, b1_, a2_, b2_, a3_, b3_, a4_, b4_, m_, q_];
 
 A = [];
     A(:,1) = cos(omega(1).*t);
@@ -68,7 +68,7 @@ Ldach = ones(1000,1)*-9999;
 while round(Li,6) ~= round(Ldach,6)
 
 L0 = [];
-L0(:,1) = m_ .*t + q_ + a1_*sin(omega(1).*t) + b1_*cos(omega(1).*t) + a2_*sin(omega(2).*t) + b2_*cos(omega(2).*t) + a3_*sin(omega(3).*t) + b3_*cos(omega(3).*t) + a4_*sin(omega(4).*t) + b4_*cos(omega(4).*t);
+L0(:,1) = m_ .*t + q_ + a1_*cos(omega(1).*t) + b1_*sin(omega(1).*t) + a2_*cos(omega(2).*t) + b2_*sin(omega(2).*t) + a3_*cos(omega(3).*t) + b3_*sin(omega(3).*t) + a4_*cos(omega(4).*t) + b4_*sin(omega(4).*t);
 
 % gekuerzter Beobachtungsvektor:
 l = L - L0;
@@ -94,20 +94,21 @@ Ldach = L + v;
 % Hauptrechenprobe
 Xdach = [ X0 ]' + xdach; % Ausgeglichene Parameter
 
-b1_= Xdach(1);
-a1_= Xdach(2);
-b2_= Xdach(3);
-a2_= Xdach(4);
-b3_= Xdach(5);
-a3_= Xdach(6);
-b4_= Xdach(7);
-a4_= Xdach(8);
+
+a1_= Xdach(1);
+b1_= Xdach(2);
+a2_= Xdach(3);
+b2_= Xdach(4);
+a3_= Xdach(5);
+b3_= Xdach(6);
+a4_= Xdach(7);
+b4_= Xdach(8);
 m_= Xdach(9);
 q_ = Xdach(10);
 
 
 Li = [];
-Li(:,1) = m_ .*t + q_ + a1_*sin(omega(1).*t) + b1_*cos(omega(1).*t) + a2_*sin(omega(2).*t) + b2_*cos(omega(2).*t) + a3_*sin(omega(3).*t) + b3_*cos(omega(3).*t) + a4_*sin(omega(4).*t) + b4_*cos(omega(4).*t);
+Li(:,1) = m_ .*t + q_ + a1_*cos(omega(1).*t) + b1_*sin(omega(1).*t) + a2_*cos(omega(2).*t) + b2_*sin(omega(2).*t) + a3_*cos(omega(3).*t) + b3_*sin(omega(3).*t) + a4_*cos(omega(4).*t) + b4_*sin(omega(4).*t);
 
 if round(Li,6) == round(Ldach,6)
     fprintf('Hauptrechenprobe war erfolgreich.\n')
@@ -122,19 +123,19 @@ end
 
 sigma_xx = diag(Sigma_xx);
 
-clearvars -except Xdach sigma_xx t L detrended omega
+% clearvars -except Xdach sigma_xx t L detrended omega
 
 %
 %%
 
-b1= Xdach(1);
-a1= Xdach(2);
-b2= Xdach(3);
-a2= Xdach(4);
-b3= Xdach(5);
-a3= Xdach(6);
-b4= Xdach(7);
-a4= Xdach(8);
+a1= Xdach(1);
+b1= Xdach(2);
+a2= Xdach(3);
+b2= Xdach(4);
+a3= Xdach(5);
+b3= Xdach(6);
+a4= Xdach(7);
+b4= Xdach(8);
 m= Xdach(9);
 q = Xdach(10);
 
@@ -146,22 +147,26 @@ ydach = [];
 T = 2000;
 
 % ydach(:,1) = m.*t + q + a1*cos(1*2*pi.*t/T) + b1*sin(1*2*pi.*t/T) + a2*cos(2*2*pi.*t/T) + b2*sin(2*2*pi.*t/T) + a3*cos(3*2*pi.*t/T) + b3*sin(3*2*pi.*t/T) + a4*cos(4*2*pi.*t/T) + b4*sin(4*2*pi.*t/T);
-ydach(:,1) = m.*t + q + a1*cos(omega(1).*t) + b1*sin(omega(1).*t) + a2*cos(omega(2).*t) + b2*sin(omega(2).*t) + a3*cos(omega(3).*t) + b3*sin(omega(3).*t) + a4*cos(omega(4).*t) + b4*sin(omega(4).*t);
+ydach(:,1) = m.*t + q + a1*sin(omega(1).*t) + b1*cos(omega(1).*t) + a2*sin(omega(2).*t) + b2*cos(omega(2).*t) + a3*sin(omega(3).*t) + b3*cos(omega(3).*t) + a4*sin(omega(4).*t) + b4*cos(omega(4).*t);
 
 
 
-figure
+figure(1)
 hold on
 plot(t,ydach, '-r')
-plot(t,L, 'b-')
+plot(t,L, 'b.')
 legend('reduzierte Zeitreihe','Ausgangszeitreihe')
 hold off
 
-figure
+saveas(1,'expdavid/1.png')
+
+figure(2)
 hold on
-plot(t,L-ydach)
+plot(t,L-ydach,'b.')
 legend('Differenz zwischen reduzierter und Ausgangszeitreihe')
 hold off
+
+saveas(2,'expdavid/2.png')
 
 
 %
@@ -184,9 +189,12 @@ lauf = 17;
 z = -400:lauf:400;
 b = hist(dL,z);
 
-figure
+figure(3)
 hold on
 bhist = histogram(dL,z);
+
+saveas(3,'expdavid/3_histogram.png')
+
 % bhist
 
 haeuf = b/1000;
@@ -200,17 +208,21 @@ plot(x,f)
 
 hold off
 
-figure
+figure(4)
 histfit(dL,48,'normal')
+
+saveas(4,'expdavid/4_histfit.png')
 
 % syms n
 % limit(haeuf(:)/n, n, inf)
 
-figure
+figure(5)
 hold on
 bar(z,r,'BarWidth', 1)
 plot(x,f,'LineWidth',2)
 hold off
+
+saveas(5,'expdavid/5_angep.png')
 
 
 %
@@ -233,10 +245,12 @@ for i = 1:length(r)
     Cemp(i,1) = Cemp(i,1) * C1;
 end
 
-figure
+figure(6)
 hold on
 plot(r,Cemp,'b-')
 hold off
+
+saveas(6,'expdavid/6_empAKF.png')
 
 
 %
@@ -262,7 +276,7 @@ Li = ones(length(Cemp),1)*9999;
 Ldach = ones(length(Cemp),1)*-9999;
 k = 0;
 % while round(Li,6) ~= round(Ldach,6)
-while k ~= 1000
+while k ~= 10
 
     A = [];
     A(:,1) = (sd^2) .* abs(r.*dt) .* (-exp(-alpha_.*abs(r.*dt)));
@@ -295,20 +309,25 @@ while k ~= 1000
 end
 
 
-figure
+figure(7)
 hold on
 plot(r,Cemp,'b-')
 plot(r, Ldach,'r-')
 hold off
 
-Canal = [];
-Canal(:,1) = (sd^2) * exp(-alpha_*abs(r.*dt));
+saveas(7,'expdavid/7.png')
 
-figure
+Canal = [];
+r1=0:0.01:20;
+Canal(:,1) = (sd^2) * exp(-alpha_*abs(r1.*dt));
+
+figure(8)
 hold on
 plot(r,Cemp,'b-')
-plot(r,Canal,'r-')
+plot(r1,Canal,'r-')
 hold off
+
+saveas(8,'expdavid/8_AKFangep.png')
 
 %
 %%
@@ -323,11 +342,14 @@ omega_line(:,1) = n .* domega;
 s = [];
 s(:,1) = 2*alpha_./(omega_line.^2+alpha_^2);
 
-figure
+figure(9)
 plot(omega_line, s)
+
+saveas(9,'expdavid/9_Spektraldichteexp.png')
 
 s2(:,1) = (sqrt(pi)/alpha_) * exp(-(omega_line/(2*alpha_)).^2);
 
-figure
+figure(10)
 plot(omega_line, s2)
 
+saveas(10,'expdavid/10_Spektraldichtegauss.png')
