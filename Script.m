@@ -7,6 +7,7 @@ clear; close all; clc; format long;
 y = readmatrix("aufgabe9.txt");
 y = y(1:1000,1:3);
 t = y(:,2);
+
 an = [88.692361725097570;-42.535052398364826;40.250629677348464;23.135242413340411];
 bn = [100.1013697891288;-33.8270656240537;15.4510264918595;-33.2975572844197];
 omega = [28.98*pi/180;15.12*pi/180;13.86*pi/180;30.06*pi/180];
@@ -49,7 +50,7 @@ b2_ = bn(2);
 b3_ = bn(3);
 b4_ = bn(4);
 
-X0 = [a1_, b1_, a2_, b2_, a3_, b3_, a4_, b4_, m_, q_];
+X0 = [b1_, a1_, b2_, a2_, b3_, a3_, b4_, a4_, m_, q_];
 
 A = [];
     A(:,1) = cos(omega(1).*t);
@@ -68,7 +69,7 @@ Ldach = ones(1000,1)*-9999;
 while round(Li,6) ~= round(Ldach,6)
 
 L0 = [];
-L0(:,1) = m_ .*t + q_ + a1_*cos(omega(1).*t) + b1_*sin(omega(1).*t) + a2_*cos(omega(2).*t) + b2_*sin(omega(2).*t) + a3_*cos(omega(3).*t) + b3_*sin(omega(3).*t) + a4_*cos(omega(4).*t) + b4_*sin(omega(4).*t);
+L0(:,1) = m_ .*t + q_ + a1_*sin(omega(1).*t) + b1_*cos(omega(1).*t) + a2_*sin(omega(2).*t) + b2_*cos(omega(2).*t) + a3_*sin(omega(3).*t) + b3_*cos(omega(3).*t) + a4_*sin(omega(4).*t) + b4_*cos(omega(4).*t);
 
 % gekuerzter Beobachtungsvektor:
 l = L - L0;
@@ -95,20 +96,20 @@ Ldach = L + v;
 Xdach = [ X0 ]' + xdach; % Ausgeglichene Parameter
 
 
-a1_= Xdach(1);
-b1_= Xdach(2);
-a2_= Xdach(3);
-b2_= Xdach(4);
-a3_= Xdach(5);
-b3_= Xdach(6);
-a4_= Xdach(7);
-b4_= Xdach(8);
+a1_= Xdach(2);
+b1_= Xdach(1);
+a2_= Xdach(4);
+b2_= Xdach(3);
+a3_= Xdach(6);
+b3_= Xdach(5);
+a4_= Xdach(8);
+b4_= Xdach(7);
 m_= Xdach(9);
 q_ = Xdach(10);
 
 
 Li = [];
-Li(:,1) = m_ .*t + q_ + a1_*cos(omega(1).*t) + b1_*sin(omega(1).*t) + a2_*cos(omega(2).*t) + b2_*sin(omega(2).*t) + a3_*cos(omega(3).*t) + b3_*sin(omega(3).*t) + a4_*cos(omega(4).*t) + b4_*sin(omega(4).*t);
+Li(:,1) = m_ .*t + q_ + a1_*sin(omega(1).*t) + b1_*cos(omega(1).*t) + a2_*sin(omega(2).*t) + b2_*cos(omega(2).*t) + a3_*sin(omega(3).*t) + b3_*cos(omega(3).*t) + a4_*sin(omega(4).*t) + b4_*cos(omega(4).*t);
 
 if round(Li,6) == round(Ldach,6)
     fprintf('Hauptrechenprobe war erfolgreich.\n')
