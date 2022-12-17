@@ -1,4 +1,4 @@
-function [N,Qxx,xdach,v,W,var0,Sigma_xx] = ausgleichung(A,P,l,theo_var)
+function [N,Qxx,xdach,v,W,var0,Sigma_xx] = ausgleichung2(A,P,l,theo_var)
 
 N = A'*P*A; % Normalgleichungsmatrix
 n = A'*P*l; % Absolutglied
