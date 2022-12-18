@@ -154,17 +154,26 @@ ydach(:,1) = m.*t + q + a1*sin(omega(1).*t) + b1*cos(omega(1).*t) + a2*sin(omega
 
 figure(1)
 hold on
-plot(t,ydach, '-r')
-plot(t,L, 'b.')
-legend('reduzierte Zeitreihe','Ausgangszeitreihe')
+subplot(2,1,1), plot(t,L, 'b-'), subtitle("Zeitreihe x(t)"), ylabel("Messgröße x[t]"), xlabel("Zeit [t]")
+subplot(2,1,2), plot(t,ydach, '-r'), subtitle("Reduzierte Zeitreihe"), ylabel("Messgröße x[t]"), xlabel("Zeit [t]")
 hold off
 
 saveas(1,'expdavid/1.png')
 
+figure(50)
+hold on
+title("Reduzierte Zeitreihe mit Ausgangszeitreihe")
+plot(t,L,'b.'), 
+plot(t,ydach, '-r'), ylabel("Messgröße x[t]"), xlabel("Zeit [t]")
+legend('reduzierte Zeitreihe','Ausgangszeitreihe')
+hold off
+
+saveas(50,'expdavid/1_1.png')
+
 figure(2)
 hold on
-plot(t,L-ydach,'b.')
-legend('Differenz zwischen reduzierter und Ausgangszeitreihe')
+title("Differenz zwischen reduzierter und Ausgangszeitreihe")
+plot(t,L-ydach,'b-'), ylabel("Messgröße x[t]"), xlabel("Zeit [t]")
 hold off
 
 saveas(2,'expdavid/2.png')
@@ -184,48 +193,52 @@ sd = sqrt(v);
 %
 %%
 % Häufigkeitsverteilung
-% clearvars -except dL
+% clearvars -except dL t
 close all
-lauf = 17;
-z = -400:lauf:400;
-b = hist(dL,z);
+nbins = 20;
+
+
+pd = fitdist(dL,'normal');
+% Find range for plotting
+q = icdf(pd,[0.0013499 0.99865]); % three-sigma range for normal distribution
+x = linspace(q(1),q(2));
+
+% Do histogram calculations
+[bincounts,binedges] = histcounts(dL,nbins);
+% bincenters = binedges(1:end-1)+diff(binedges)/2;
+bincenters = linspace(-400,400,nbins);
 
 figure(3)
 hold on
-bhist = histogram(dL,z);
+title("Histogramm der relativen normierten Häufigkeiten")
+bar(bincenters,bincounts/length(dL),1);
+ylabel("relative normierte Häufigkeit"), xlabel("x [ ]")
+hold off
 
 saveas(3,'expdavid/3_histogram.png')
 
-% bhist
-
-haeuf = b/1000;
-r = haeuf/lauf;
-x = linspace(-400,400,50);
-f = 1/(sqrt(2*pi)*sd)*exp((-1/2)*(x-mu).^2/sd^2);
-f1 = @(x) 1/(sqrt(2*pi)*sd)*exp((-1/2)*(x-mu).^2/sd^2);
-integral(f1,-400,400)
-plot(x,f)
-
-
-hold off
 
 figure(4)
-histfit(dL,48,'normal')
-
-saveas(4,'expdavid/4_histfit.png')
-
-% syms n
-% limit(haeuf(:)/n, n, inf)
-
-figure(5)
 hold on
-bar(z,r,'BarWidth', 1)
-plot(x,f,'LineWidth',2)
+title("Histogramm der Häufigkeitsverteilung und Dichtefunktion")
+% Plot the histogram with no gap between bars.
+bar(bincenters,bincounts/length(dL),1);
+% hh = bar(ax, z,haeuf,1);
+
+% Normalize the density to match the total area of the histogram
+binwidth = binedges(2)-binedges(1); % Finds the width of each bin
+area = n * binwidth;
+y1 = area * pdf(pd,x)/length(dL);
+y2 = @(x) area * pdf(pd,x)/1000;
+integral(y2,-400,400)
+
+% Overlay the density
+plot(x,y1,'r-','LineWidth',2);
+
+legend("Häufigkeiten","Dichtefunktion der Gaußschen Normalverteilung")
+ylabel("relative normierte Häufigkeit"), xlabel("x [ ]")
 hold off
-
-saveas(5,'expdavid/5_angep.png')
-
-
+saveas(4,'expdavid/4_histfit.png')
 %
 %%
 % empirische Schätzung AKF
@@ -248,7 +261,8 @@ end
 
 figure(6)
 hold on
-plot(r,Cemp,'b-')
+title("Empirische Autokovarianzfunktion")
+plot(r,Cemp,'b-'), ylabel("C[\tau]"), xlabel("\tau")
 hold off
 
 saveas(6,'expdavid/6_empAKF.png')
@@ -312,8 +326,9 @@ end
 
 figure(7)
 hold on
+grid on
 plot(r,Cemp,'b-')
-plot(r, Ldach,'r-')
+plot(r,Ldach,'r-')
 hold off
 
 saveas(7,'expdavid/7.png')
@@ -324,8 +339,12 @@ Canal(:,1) = (sd^2) * exp(-alpha_*abs(r1.*dt));
 
 figure(8)
 hold on
+grid on
+title("Analytische Autokovarianzfunktion")
 plot(r,Cemp,'b-')
 plot(r1,Canal,'r-')
+legend("Empirische AKF","Analytische AKF (Exponential)")
+ylabel("C[\tau]"), xlabel("\tau")
 hold off
 
 saveas(8,'expdavid/8_AKFangep.png')
@@ -344,13 +363,25 @@ s = [];
 s(:,1) = 2*alpha_./(omega_line.^2+alpha_^2);
 
 figure(9)
+hold on
+grid on
+title("Spektraldichte: Exponentialmodell")
 plot(omega_line, s)
+ylabel("S[\omega]"), xlabel("\omega")
+hold off
 
 saveas(9,'expdavid/9_Spektraldichteexp.png')
 
 s2(:,1) = (sqrt(pi)/alpha_) * exp(-(omega_line/(2*alpha_)).^2);
 
 figure(10)
+hold on
+grid on
+title("Spektraldichte: Gaußsches Modell")
 plot(omega_line, s2)
+ylabel("S[\omega]"), xlabel("\omega")
+hold off
 
 saveas(10,'expdavid/10_Spektraldichtegauss.png')
+
+close all
